@@ -10,7 +10,6 @@ const LoginPage = () => {
   const [password, setPassword] = useState("")
   const [bio, setBio] = useState("")
   const [isDataSubmitted, setIsDataSubmitted] = useState(false);
-  const [agreedToTerms, setAgreedToTerms] = useState(false);
 
 
   const { login } = useContext(AuthContext)
