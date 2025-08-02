@@ -2,66 +2,100 @@ import express from "express";
 import "dotenv/config";
 import cors from "cors";
 import http from "http";
-// import { connect } from "http2";
 import { connectDB } from "./lib/db.js";
 import userRouter from "./routes/userRoutes.js";
 import messageRouter from "./routes/messageRoutes.js";
 import { Server } from "socket.io";
 
-// create express app and http server
-
-const app=express();
-const server =http.createServer(app)
-
+// Create express app and HTTP server
+const app = express();
+const server = http.createServer(app);
 
 // Initialize socket.io server
-
 export const io = new Server(server, {
-    cors: {origin: "*"}
-})
+  cors: { origin: "*" },
+});
 
-// Store online users
-export const userSocketMap = {}; // {userID : socketID}
+// ✅ Store online users: userId => Set of socket IDs
+export const userSocketMap = {}; // { userId: Set(socketIds) }
 
-// socket.io connection handler
+io.on("connection", (socket) => {
+  const userId = socket.handshake.query.userId;
+  console.log("🟢 User Connected", userId, socket.id);
 
-io.on("connection", (socket)=>{
-    const userId = socket.handshake.query.userId;
-    console.log("User Connected", userId); 
+  if (userId) {
+    if (!userSocketMap[userId]) {
+      userSocketMap[userId] = new Set();
+    }
+    userSocketMap[userId].add(socket.id);
+    io.emit("getOnlineUsers", Object.keys(userSocketMap));
+  }
 
-    if(userId) userSocketMap[userId] = socket.id;
+  socket.on("disconnect", () => {
+    console.log("🔴 User Disconnected", socket.id);
+    if (userId && userSocketMap[userId]) {
+      userSocketMap[userId].delete(socket.id);
+      if (userSocketMap[userId].size === 0) {
+        delete userSocketMap[userId];
+      }
+    }
+    io.emit("getOnlineUsers", Object.keys(userSocketMap));
+  });
+});
 
 
-    // Emit online users to all connected client
+// Helper to get sockets by userId
+export const getUserSocket = (userId) => {
+  return userSocketMap[userId];
+};
+
+// Socket.io connection handler
+io.on("connection", (socket) => {
+  const userId = socket.handshake.query.userId;
+  console.log("🟢 User Connected:", userId, "Socket ID:", socket.id);
+
+  if (userId) {
+    if (!userSocketMap[userId]) {
+      userSocketMap[userId] = new Set();
+    }
+    userSocketMap[userId].add(socket.id);
+
+    // Notify all users of updated online users
+    io.emit("getOnlineUsers", Object.keys(userSocketMap));
+  }
+
+  socket.on("disconnect", () => {
+    console.log("🔴 Socket Disconnected:", socket.id, "for user:", userId);
+    if (userId && userSocketMap[userId]) {
+      userSocketMap[userId].delete(socket.id);
+      if (userSocketMap[userId].size === 0) {
+        delete userSocketMap[userId];
+      }
+    }
 
     io.emit("getOnlineUsers", Object.keys(userSocketMap));
+  });
+});
 
-    socket.on("disconnect", ()=>{
-        console.log("User Disconnected", userId);
-        delete userSocketMap[userId];
-        io.emit("getOnlineUsers", Object.keys(userSocketMap))
-    })
-})
-
-// Middleware setup
-app.use(express.json({limit: "4mb"}));
+// Middleware
+app.use(express.json({ limit: "4mb" }));
 app.use(cors());
 
+// Routes
+app.use("/api/status", (req, res) => res.send("Server is Live ✅"));
+app.use("/api/auth", userRouter);
+app.use("/api/messages", messageRouter);
 
-//Routes setup
-app.use("/api/status", (req,res)=> res.send("Server is Live"));
-app.use("/api/auth",userRouter);
-app.use("/api/messages", messageRouter)
-
-// Connect to Mongodb
-
+// Connect to MongoDB
 await connectDB();
 
-if(process.env.NODE_ENV!== "production"){
-    const PORT = process.env.PORT || 5001;
-    server.listen(PORT,() => console.log("Sever is listening at PORT : " + PORT));
+// Start server
+if (process.env.NODE_ENV !== "production") {
+  const PORT = process.env.PORT || 5001;
+  server.listen(PORT, () =>
+    console.log("🚀 Server is listening at PORT:", PORT)
+  );
 }
 
-// Export server for vercel
-
+// For Vercel deployment
 export default server;

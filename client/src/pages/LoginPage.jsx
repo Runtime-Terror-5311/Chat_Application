@@ -10,6 +10,8 @@ const LoginPage = () => {
   const [password, setPassword] = useState("")
   const [bio, setBio] = useState("")
   const [isDataSubmitted, setIsDataSubmitted] = useState(false);
+  const [agreedToTerms, setAgreedToTerms] = useState(false);
+
 
   const { login } = useContext(AuthContext)
 
@@ -81,7 +83,7 @@ const LoginPage = () => {
         </button>
 
         <div className='flex items-center gap-2 text-sm text-gray-500'>
-          <input type="checkbox" />
+          <input type="checkbox" required/>
           <p>Agree to the terms of use & Privacy Policy</p>
         </div>
 
