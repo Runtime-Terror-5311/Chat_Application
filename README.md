@@ -82,6 +82,7 @@ It allows users to register, update profiles, send/receive messages in real-time
    {
      VITE_BACKEND_URL=http://localhost:8001
    }
+   
 11. npm run dev
 
 
