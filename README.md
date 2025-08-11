@@ -1,11 +1,11 @@
-### MERN Real-Time Chat App
+# MERN Real-Time Chat App
 
 This is a fully functional real-time chat application built using the "MERN Stack" with "Socket.IO".
 It allows users to register, update profiles, send/receive messages in real-time, and track user activity such as online status and unread messages.
 
 ## Features
 
-# User Authentication
+### User Authentication
 - Sign Up – Create a new user account with full name, email, password, and a short bio.
 ![Sign Up](https://github.com/user-attachments/assets/51c605ee-3e8d-4f57-8cdc-084f73860e11)
   
@@ -16,7 +16,7 @@ It allows users to register, update profiles, send/receive messages in real-time
 -  Logout – End the session and disconnect from real-time communication.
   ![Logout](https://github.com/user-attachments/assets/a1b9f508-8d78-4fdd-91a0-a92f33058d29)
 
-# Profile Management
+### Profile Management
 
 -  Update Name – Edit and save your full name.
 
@@ -59,7 +59,7 @@ It allows users to register, update profiles, send/receive messages in real-time
 
 
 
-### How to Setup this app in your pc
+# How to Setup this app in your pc
 
 1. Clone the repository using ----->  git clone https://github.com/Runtime-Terror-5311/Chat_Application.git
 2. cd Chat_Application
