@@ -89,7 +89,16 @@ app.use("/api/messages", messageRouter);
 // Connect to MongoDB
 await connectDB();
 
-// Start server
+// Middleware
+app.use(express.json({ limit: "4mb" }));
+app.use(cors());
+
+// Routes
+app.use("/api/status", (req, res) => res.send("Server is Live ✅"));
+app.use("/api/auth", userRouter);
+app.use("/api/messages", messageRouter);
+
+// Local development
 if (process.env.NODE_ENV !== "production") {
   const PORT = process.env.PORT || 5001;
   server.listen(PORT, () =>
@@ -97,5 +106,5 @@ if (process.env.NODE_ENV !== "production") {
   );
 }
 
-// For Vercel deployment
-export default server;
+// ✅ For Vercel: export app, not server
+export default app;
